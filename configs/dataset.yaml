@@ -1,0 +1,66 @@
+# Dataset Configuration: UTA-RLDD & Preprocessing Pipeline
+
+dataset:
+  name: "UTA-RLDD"
+  description: "University of Texas at Arlington Real-Life Drowsiness Dataset"
+  url: "https://sites.google.com/view/utarldd/home"
+  
+  classes:
+    0: "Alert"
+    1: "Low Vigilance"
+    2: "Drowsy"
+  num_classes: 3
+
+  # Conceptual extended alerting (post-classifier logic only, not fabricated dataset labels)
+  conceptual_states:
+    0: "ALERT"
+    1: "EARLY_DROWSINESS"
+    2: "DROWSY"
+    3: "SEVERE_DROWSINESS"  # Derived from temporal persistence of Class 2
+
+preprocessing:
+  sample_fps: 15            # Downsample video to 15 FPS for temporal efficiency
+  sequence_length: 30       # 30 frames = 2.0 seconds temporal window at 15 FPS
+  stride_train: 15          # 50% temporal overlap for training data augmentation
+  stride_val: 30            # Non-overlapping for unbiased evaluation
+  stride_test: 30           # Non-overlapping for evaluation
+  
+  # MediaPipe Landmark Detector Settings
+  face_detection:
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+    refine_landmarks: true  # Enables iris tracking for accurate EAR and gaze
+
+  # Feature extraction indices & specifications
+  features:
+    eye:
+      compute_ear: true
+      compute_blink_rate: true
+      compute_perclos: true
+      left_eye_landmarks: [362, 385, 387, 263, 373, 380]
+      right_eye_landmarks: [33, 160, 158, 133, 153, 144]
+      left_iris_landmarks: [468, 469, 470, 471]
+      right_iris_landmarks: [473, 474, 475, 476]
+    mouth:
+      compute_mar: true
+      compute_yawn_frequency: true
+      inner_mouth_landmarks: [78, 81, 13, 311, 308, 402, 14, 178]
+      outer_mouth_landmarks: [61, 37, 0, 267, 291, 314, 17, 84]
+    head:
+      estimate_pnp_pose: true
+      compute_angular_velocity: true
+      pose_landmarks: [1, 33, 263, 61, 291, 199] # Nose tip, eye corners, mouth corners, chin
+
+quality_control:
+  min_face_confidence: 0.40
+  flag_glasses_occlusion: true
+  flag_mouth_occlusion: true
+  handle_missing_frames: "interpolate_or_zero_with_flag"
+
+splitting:
+  num_folds: 5
+  seed: 42
+  protocol: "subject_independent"  # No subject overlap across train/val/test
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15

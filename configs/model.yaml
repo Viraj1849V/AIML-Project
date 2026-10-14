@@ -1,0 +1,81 @@
+# Model Architectures & Training Hyperparameters
+
+experiment:
+  default_model: "adaptive_gru"
+  available_models:
+    - "baseline_eye"
+    - "baseline_static"
+    - "baseline_gru"
+    - "baseline_lstm"
+    - "adaptive_gru"
+
+feature_dimensions:
+  eye_dim: 8      # left EAR, right EAR, avg EAR, eye openness, blink flag, blink duration, blink freq, perclos
+  mouth_dim: 5    # MAR, mouth openness, yawn flag, yawn duration, yawn frequency
+  head_dim: 6     # pitch, yaw, roll, pitch_velocity, yaw_velocity, roll_velocity
+  quality_dim: 4  # face_detected, face_conf, eye_vis, mouth_vis
+  total_raw_dim: 23
+
+models:
+  baseline_eye:
+    type: "classical"
+    classifier: "logistic_regression"  # or "svm"
+    input_features: ["ear_avg", "blink_freq", "perclos"]
+
+  baseline_static:
+    type: "mlp"
+    hidden_dims: [64, 32]
+    dropout: 0.2
+    activation: "relu"
+
+  baseline_gru:
+    type: "recurrent"
+    rnn_cell: "gru"
+    input_dim: 23
+    hidden_dim: 64
+    num_layers: 2
+    dropout: 0.2
+    bidirectional: false
+
+  baseline_lstm:
+    type: "recurrent"
+    rnn_cell: "lstm"
+    input_dim: 23
+    hidden_dim: 64
+    num_layers: 2
+    dropout: 0.2
+    bidirectional: false
+
+  adaptive_gru:
+    type: "adaptive_fusion"
+    branch_encoders:
+      eye_embed_dim: 32
+      mouth_embed_dim: 24
+      head_embed_dim: 24
+    reliability_gating:
+      hidden_dim: 32
+      temperature: 1.0
+      use_quality_signals: true  # Inputs quality indicators into gating network
+      gating_type: "softmax"     # "softmax" ensures weights sum to 1; "sigmoid" allows independent gating
+    temporal_fusion:
+      rnn_cell: "gru"
+      hidden_dim: 64
+      num_layers: 2
+      dropout: 0.2
+    classifier_head:
+      hidden_dims: [32]
+      dropout: 0.2
+      num_classes: 3
+
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  epochs: 50
+  early_stopping_patience: 10
+  lr_scheduler: "cosine"
+  optimizer: "adamw"
+  loss:
+    type: "cross_entropy"  # or "focal_loss"
+    label_smoothing: 0.05
+    use_class_weights: true

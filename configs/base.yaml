@@ -1,0 +1,33 @@
+# Adaptive Multi-Feature Temporal Driver Drowsiness Detection
+# Base System Configuration
+
+project:
+  name: "adaptive_temporal_drowsiness_detection"
+  version: "0.1.0"
+  seed: 42
+  device: "cuda"  # "cuda" or "cpu"
+
+realtime:
+  camera_index: 0
+  frame_width: 640
+  frame_height: 480
+  target_fps: 30
+  sequence_length: 30       # Frames in rolling window (1.0 sec at 30 fps)
+  persistence_seconds: 2.0  # State must persist for 2.0s before sounding high-level alert
+  alert_thresholds:
+    ear_closed_threshold: 0.21
+    mar_yawn_threshold: 0.60
+    perclos_threshold: 0.40  # 40% eye closure over window
+  visualization:
+    show_landmarks: true
+    show_feature_bars: true
+    show_reliability_weights: true
+    font_scale: 0.65
+
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  data_splits: "data/splits"
+  checkpoints: "results/checkpoints"
+  metrics: "results/metrics"
+  plots: "results/plots"

@@ -1,0 +1,44 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Datasets & Processed Tensors
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/splits/*
+!data/splits/.gitkeep
+*.npz
+*.h5
+*.hdf5
+*.parquet
+*.mp4
+*.avi
+*.mov
+
+# Model Checkpoints & Logs
+results/checkpoints/*
+!results/checkpoints/.gitkeep
+results/metrics/*
+!results/metrics/.gitkeep
+results/plots/*
+!results/plots/.gitkeep
+wandb/
+runs/
+*.log
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
